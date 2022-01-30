@@ -4,3 +4,4 @@ unzip chaque fichier ou le dossier en un coup ?
 si chaque fichier séparé, compiler les données avec un indice temporel -> choper les caractères du titre
 nettoyer les données, via le site précisé
 faire les indicateurs.
+fdsfds
