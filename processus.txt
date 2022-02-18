@@ -5,3 +5,7 @@ si chaque fichier séparé, compiler les données avec un indice temporel -> cho
 nettoyer les données, via le site précisé
 faire les indicateurs.
 fdsfds
+function dans R:
+comment chopper un mois ? 
+comment chopper tous les mois ?
+structure de la fonction ?
