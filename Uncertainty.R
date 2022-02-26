@@ -46,14 +46,111 @@ importe_data <- function(month){
       solo <- import_un_mois(x)
       data <- rbind(data,solo)
     }
-    data_uncertainty <<- data
+    data_uncertainty <- data
+    return(data_uncertainty)
   } else if(month=="last"){
-    data_uncertainty <<- import_un_mois(string_2017_onward()[length(string_2017_onward())])
+    data_uncertainty <- import_un_mois(string_2017_onward()[length(string_2017_onward())])
+    return(data_uncertainty)
   } else {
     print("Error: the month parameter should be either 'all' or 'last'")
   }
     
 }
+importe_data(month = "last")
+
+gere_iso <- function(data){
+  data <- data[data$DECLARANT_ISO !="QQ"&data$DECLARANT_ISO !="QU"&
+              data$DECLARANT_ISO !="QV"&data$DECLARANT_ISO !="QW"&
+              data$DECLARANT_ISO !="TP"&data$DECLARANT_ISO !="XA"&
+              data$DECLARANT_ISO !="XC"&data$DECLARANT_ISO !="XE"&
+              data$DECLARANT_ISO !="XF"&data$DECLARANT_ISO !="XG"&
+              data$DECLARANT_ISO !="XH"&data$DECLARANT_ISO !="XI"&
+              data$DECLARANT_ISO !="XK"&data$DECLARANT_ISO !="XL"&
+              data$DECLARANT_ISO !="XM"&data$DECLARANT_ISO !="XO"&
+              data$DECLARANT_ISO !="XP"&data$DECLARANT_ISO !="XR"&
+              data$DECLARANT_ISO !="XS"&data$DECLARANT_ISO !="FR"&
+              data$DECLARANT_ISO !="EU"&data$DECLARANT_ISO !="GL"&
+              data$DECLARANT_ISO !="PA"&data$DECLARANT_ISO !="XX",]
+  data <- data[data$PARTNER_ISO !="QQ"&data$PARTNER_ISO !="QU"&
+               data$PARTNER_ISO !="QV"&data$PARTNER_ISO !="QW"&
+               data$PARTNER_ISO !="TP"&data$PARTNER_ISO !="XA"&
+               data$PARTNER_ISO !="XC"&data$PARTNER_ISO !="XE"&
+               data$PARTNER_ISO !="XF"&data$PARTNER_ISO !="XG"&
+               data$PARTNER_ISO !="XH"&data$PARTNER_ISO !="XI"&
+               data$PARTNER_ISO !="XK"&data$PARTNER_ISO !="XL"&
+               data$PARTNER_ISO !="XM"&data$PARTNER_ISO !="XO"&
+               data$PARTNER_ISO !="XP"&data$PARTNER_ISO !="XR"&
+               data$PARTNER_ISO !="XS"&data$PARTNER_ISO !="FR"&
+               data$PARTNER_ISO !="EU"&
+               data$PARTNER_ISO !="GL"&data$PARTNER_ISO !="PA"&
+               data$PARTNER_ISO !="XX",]
+  data[data$PARTNER_ISO=="EL"] <- data[data$PARTNER_ISO=="GR"]
+  data[data$DECLARANT_ISO=="EL"] <- data[data$DECLARANT_ISO=="GR"]
+  return(data)
+  
+}
+
+gere_nc <- function(data){
+  num_colonne<-which( colnames(data)=="PRODUCT_NC" )
+  for( i in data[,num_colonne]){
+    if (length(data[i,num_colonne])==1){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"0000000",sep = "")
+    }else if (length(data[i,num_colonne])==2){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"000000",sep = "")
+    }else if (length(data[i,num_colonne])==3){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"00000",sep = "")
+    }else if (length(data[i,num_colonne])==4){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"0000",sep = "")
+    }else if (length(data[i,num_colonne])==5){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"000",sep = "")
+    }else if (length(data[i,num_colonne])==6){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"00",sep = "")
+    }else if (length(data[i,num_colonne])==7){
+      data[i,num_colonne]<-paste(data[i,num_colonne],"0",sep = "")
+    }
+  }
+  data <- data[data$PRODUCT_NC !="99500000"&data$PRODUCT_NC !="98807300"&
+               data$PRODUCT_NC !="98808400"&data$PRODUCT_NC !="98809900"&
+               data$PRODUCT_NC !="98808500"&data$PRODUCT_NC !="99699999"&
+               data$PRODUCT_NC !="99050000"&data$PRODUCT_NC !="99190000"&
+               data$PRODUCT_NC !="99300000"&data$PRODUCT_NC !="99310000"&
+               data$PRODUCT_NC !="0000000",]
+  return(data)
+}
+
+gere_flows <- function(data){
+  data <- data[!(data$TRADE_TYPE=="I"&data$QUANTITY_IN_KG==0),]
+}
+
+convertit_nc <- function(data){
+  data$PRODUCT_NC <- lapply(data$PRODUCT_NC,)
+  return(data)
+}
+importe_et_nettoie <- function(month){
+  data <- importe_data(month = month)
+  data <- gere_iso(data)
+  data <- gere_nc(data)
+  data <- gere_flows(data)
+  data <- convertit_nc(data)
+  data_uncertainty <<- data
+}
+
+
+data$PRODUCT_NC <- lapply(data$PRODUCT_NC,)
+
+
+
+
+data <- data[!(data$TRADE_TYPE=="I"&data$QUANTITY_IN_KG==0),]
+
+
+which(data$FLOW[data$TRADE_TYPE=="I"])
+table(data$QUANTITY_IN_KG[data$TRADE_TYPE=="I"])
+#Pas compris s'il f allait remplacer:
+#replace iso2="GR" if iso2=="EL"
+#replace drop=1 if inlist(iso2,"GL","PA","XX")
+#Checker le 0 dans les consignes de cleaning
+#egen drop=sum(export) if nc8group==1| nc8part==1
 
 #answer <- c( content, wrapper) permet de append
 #Roxygen package pour la doc des fonctions
@@ -87,3 +184,12 @@ df2 <- import_un_mois("full201702.7z")
 df_test <- rbind(df1,df2)
 table(df_test$PERIOD)
 
+which( colnames(data)=="PRODUCT_NC" )
+which(data[,"PRODUCT_NC"])
+data<-data_uncertainty
+table()
+
+table(data$PARTNER_ISO)
+table(data$PRODUCT_NC)
+type
+df2<-df1[!(df1$Name=="George" | df1$Name=="Andrea"),]
