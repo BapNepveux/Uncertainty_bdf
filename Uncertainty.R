@@ -3,8 +3,6 @@ library(rvest)
 library(tidyverse)
 
 
-
-
 import_un_mois <- function(nom_du_fichier){
   tf <- tempfile() ; td <- tempdir()
   website <- "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?sort=1&downfile=comext%2FCOMEXT_DATA%2FPRODUCTS%2F"
@@ -56,21 +54,22 @@ importe_data <- function(month){
   }
     
 }
-importe_data(month = "last")
+
 
 gere_iso <- function(data){
   data <- data[data$DECLARANT_ISO !="QQ"&data$DECLARANT_ISO !="QU"&
-              data$DECLARANT_ISO !="QV"&data$DECLARANT_ISO !="QW"&
-              data$DECLARANT_ISO !="TP"&data$DECLARANT_ISO !="XA"&
-              data$DECLARANT_ISO !="XC"&data$DECLARANT_ISO !="XE"&
-              data$DECLARANT_ISO !="XF"&data$DECLARANT_ISO !="XG"&
-              data$DECLARANT_ISO !="XH"&data$DECLARANT_ISO !="XI"&
-              data$DECLARANT_ISO !="XK"&data$DECLARANT_ISO !="XL"&
-              data$DECLARANT_ISO !="XM"&data$DECLARANT_ISO !="XO"&
-              data$DECLARANT_ISO !="XP"&data$DECLARANT_ISO !="XR"&
-              data$DECLARANT_ISO !="XS"&data$DECLARANT_ISO !="FR"&
-              data$DECLARANT_ISO !="EU"&data$DECLARANT_ISO !="GL"&
-              data$DECLARANT_ISO !="PA"&data$DECLARANT_ISO !="XX",]
+               data$DECLARANT_ISO !="QV"&data$DECLARANT_ISO !="QW"&
+               data$DECLARANT_ISO !="TP"&data$DECLARANT_ISO !="XA"&
+               data$DECLARANT_ISO !="XC"&data$DECLARANT_ISO !="XE"&
+               data$DECLARANT_ISO !="XF"&data$DECLARANT_ISO !="XG"&
+               data$DECLARANT_ISO !="XH"&data$DECLARANT_ISO !="XI"&
+               data$DECLARANT_ISO !="XK"&data$DECLARANT_ISO !="XL"&
+               data$DECLARANT_ISO !="XM"&data$DECLARANT_ISO !="XO"&
+               data$DECLARANT_ISO !="XP"&data$DECLARANT_ISO !="XR"&
+               data$DECLARANT_ISO !="XS"&data$DECLARANT_ISO !="FR"&
+               data$DECLARANT_ISO !="EU"&data$DECLARANT_ISO !="GL"&
+               data$DECLARANT_ISO !="PA"&data$DECLARANT_ISO !="XX",]
+  
   data <- data[data$PARTNER_ISO !="QQ"&data$PARTNER_ISO !="QU"&
                data$PARTNER_ISO !="QV"&data$PARTNER_ISO !="QW"&
                data$PARTNER_ISO !="TP"&data$PARTNER_ISO !="XA"&
@@ -81,18 +80,15 @@ gere_iso <- function(data){
                data$PARTNER_ISO !="XM"&data$PARTNER_ISO !="XO"&
                data$PARTNER_ISO !="XP"&data$PARTNER_ISO !="XR"&
                data$PARTNER_ISO !="XS"&data$PARTNER_ISO !="FR"&
-               data$PARTNER_ISO !="EU"&
-               data$PARTNER_ISO !="GL"&data$PARTNER_ISO !="PA"&
-               data$PARTNER_ISO !="XX",]
-  data[data$PARTNER_ISO=="EL"] <- data[data$PARTNER_ISO=="GR"]
-  data[data$DECLARANT_ISO=="EL"] <- data[data$DECLARANT_ISO=="GR"]
-  return(data)
+               data$PARTNER_ISO !="EU"&data$PARTNER_ISO !="GL"&
+               data$PARTNER_ISO !="PA"&data$PARTNER_ISO !="XX",]
   
+  return(data)
 }
 
 gere_nc <- function(data){
-  num_colonne<-which( colnames(data)=="PRODUCT_NC" )
-  for( i in data[,num_colonne]){
+  num_colonne<-which(colnames(data)=="PRODUCT_NC")
+  for(i in length(data[,num_colonne])){
     if (length(data[i,num_colonne])==1){
       data[i,num_colonne]<-paste(data[i,num_colonne],"0000000",sep = "")
     }else if (length(data[i,num_colonne])==2){
@@ -120,29 +116,28 @@ gere_nc <- function(data){
 
 gere_flows <- function(data){
   data <- data[!(data$TRADE_TYPE=="I"&data$QUANTITY_IN_KG==0),]
-}
-
-convertit_nc <- function(data){
-  data$PRODUCT_NC <- lapply(data$PRODUCT_NC,)
   return(data)
 }
+
+conversion_nc <- function(data){
+  data$PRODUCT_NC <- substring(data$PRODUCT_NC,1,6)
+  return(data)
+}
+
+
+
 importe_et_nettoie <- function(month){
   data <- importe_data(month = month)
   data <- gere_iso(data)
   data <- gere_nc(data)
   data <- gere_flows(data)
-  data <- convertit_nc(data)
-  data_uncertainty <<- data
+  data <- conversion_nc(data)
+  data_uncertainty <- data
+  return(data_uncertainty)
 }
 
-
-data$PRODUCT_NC <- lapply(data$PRODUCT_NC,)
-
-
-
-
-data <- data[!(data$TRADE_TYPE=="I"&data$QUANTITY_IN_KG==0),]
-
+#data$PRODUCT_NC <- substring(data$PRODUCT_NC,1,6)
+#data <- data[!(data$TRADE_TYPE=="I"&data$QUANTITY_IN_KG==0),]
 
 which(data$FLOW[data$TRADE_TYPE=="I"])
 table(data$QUANTITY_IN_KG[data$TRADE_TYPE=="I"])
