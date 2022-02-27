@@ -22,6 +22,7 @@ string_tous_mois <- function(){
   string_1 <- string_1[!grepl("52.7z",string_1)]
   return(string_1)
 }
+
 string_2017_onward <- function(){
   alpha <- string_tous_mois()
   depart <- grepl("2017",alpha)
@@ -29,6 +30,7 @@ string_2017_onward <- function(){
   indice_depart <- indice[1]
   return(alpha[indice_depart:length(alpha)])
 }
+
 string_dernier_mois <- function(){
   string_1 <- string_2017_onward()
   return(string_1[length(string_1)])
@@ -46,10 +48,12 @@ importe_data <- function(month){
     }
     data_uncertainty <- data
     return(data_uncertainty)
-  } else if(month=="last"){
+  } 
+  else if(month=="last"){
     data_uncertainty <- import_un_mois(string_2017_onward()[length(string_2017_onward())])
     return(data_uncertainty)
-  } else {
+  } 
+  else {
     print("Error: the month parameter should be either 'all' or 'last'")
   }
     
@@ -91,17 +95,23 @@ gere_nc <- function(data){
   for(i in length(data[,num_colonne])){
     if (length(data[i,num_colonne])==1){
       data[i,num_colonne]<-paste(data[i,num_colonne],"0000000",sep = "")
-    }else if (length(data[i,num_colonne])==2){
+    }
+    else if (length(data[i,num_colonne])==2){
       data[i,num_colonne]<-paste(data[i,num_colonne],"000000",sep = "")
-    }else if (length(data[i,num_colonne])==3){
+    }
+    else if (length(data[i,num_colonne])==3){
       data[i,num_colonne]<-paste(data[i,num_colonne],"00000",sep = "")
-    }else if (length(data[i,num_colonne])==4){
+    }
+    else if (length(data[i,num_colonne])==4){
       data[i,num_colonne]<-paste(data[i,num_colonne],"0000",sep = "")
-    }else if (length(data[i,num_colonne])==5){
+    }
+    else if (length(data[i,num_colonne])==5){
       data[i,num_colonne]<-paste(data[i,num_colonne],"000",sep = "")
-    }else if (length(data[i,num_colonne])==6){
+    }
+    else if (length(data[i,num_colonne])==6){
       data[i,num_colonne]<-paste(data[i,num_colonne],"00",sep = "")
-    }else if (length(data[i,num_colonne])==7){
+    }
+    else if (length(data[i,num_colonne])==7){
       data[i,num_colonne]<-paste(data[i,num_colonne],"0",sep = "")
     }
   }
@@ -167,7 +177,9 @@ somme_month_month <- function(data){
   }
   return(somme)
 }
+
 somme_month_month(data)
+
 growth_month_month <- function(data){
   data_bis <- somme_month_month(data)
   longueur <- seq(3, length(data_bis),1)
@@ -189,9 +201,10 @@ growth_month_year <- function(data){
       colnames(growth)[i] <- paste(as.integer(levels(as.factor(data$PERIOD)))[i],as.integer(levels(as.factor(data$PERIOD)))[i+12],sep = "/")
     }
   return(growth)
-  }else{
-  return("La base de données est plus courte qu'une année, nous ne poubons donc pas étudier les variations
-         de commerce d'une année sur l'autre")
+  }
+  else{
+  return("La base de données est plus courte qu'une année, nous ne pouvons donc pas étudier les variations
+         des échanges d'une année sur l'autre")
   }
 }
 
