@@ -191,13 +191,14 @@ growth_month_month <- function(data){
   return(growth)
 }
 
-growth_month_year <- function(data){
+growth_month_year_normal <- function(data){
   somme_par_mois <- somme_month_month(data)
-  growth <- (somme_par_mois[1,13]-somme_par_mois[1,1])/somme_par_mois[1,13]
   longueur <- seq(2, length(somme_par_mois),1)
-  if(exists(growth)){ 
+  essai <- try((somme_par_mois[1,13]-somme_par_mois[1,1])/somme_par_mois[1,1],silent = T)
+  if(class(essai)=="numeric"){ 
+    growth <- (somme_par_mois[1,13]-somme_par_mois[1,1])/somme_par_mois[1,1]
     for(i in longueur-12){
-      growth <- cbind(growth,(somme_par_mois[1,i+12]-somme_par_mois[1,i])/somme_par_mois[1,i+12])
+      growth <- cbind(growth,(somme_par_mois[1,i+12]-somme_par_mois[1,i])/somme_par_mois[1,i])
       colnames(growth)[i] <- paste(as.integer(levels(as.factor(data$PERIOD)))[i],as.integer(levels(as.factor(data$PERIOD)))[i+12],sep = "/")
     }
   return(growth)
@@ -208,8 +209,41 @@ growth_month_year <- function(data){
   }
 }
 
+growth_month_year_midpoint <- function(data){
+  somme_par_mois <- somme_month_month(data)
+  longueur <- seq(2, length(somme_par_mois),1)
+  essai <- try((somme_par_mois[1,13]-somme_par_mois[1,1])/mean(somme_par_mois[1,1],somme_par_mois[1,13]),silent = T)
+  if(class(essai)=="numeric"){ 
+    growth <- (somme_par_mois[1,13]-somme_par_mois[1,1])/mean(somme_par_mois[1,1],somme_par_mois[1,13])
+    for(i in longueur[1:length(longueur)-12]){
+      growth <- cbind(growth,(somme_par_mois[1,i+12]-somme_par_mois[1,i])/mean(somme_par_mois[1,i],somme_par_mois[1,i+12]))
+      colnames(growth)[i] <- paste(as.integer(levels(as.factor(data$PERIOD)))[i],as.integer(levels(as.factor(data$PERIOD)))[i+12],sep = "/")
+    }
+    return(growth)
+  }
+  else{
+    return("La base de données est plus courte qu'une année, nous ne pouvons donc pas étudier les variations
+         des échanges d'une année sur l'autre")
+  }
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+growth_month_year(data)
+somme_par_mois <- somme_month_month(data)
+bonjour <- try((somme_par_mois[1,2]-somme_par_mois[1,1])/somme_par_mois[1,2],silent = T)
+class(bonjour)
 growth_month_year(data)
 length(data)
 
@@ -222,5 +256,5 @@ colnames(growth_bis)[1]
 growth
 somme_month_month(data)
 #?`Memory-limits`
-#year on year -> comparaison avec l'année précédente .
+#year on year -> comparaison avec l'année précédente.
 
