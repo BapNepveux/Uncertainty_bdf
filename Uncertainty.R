@@ -172,15 +172,18 @@ somme_month_month <- function(data){
   return(somme)
 }
 growth_month_month <- function(){
-  data <- somme_month_month()
+  data <- somme_month_month(data)
   longueur <- seq(3, length(data),1)
   growth <- (data[1,2]-data[1,1])/data[1,1]
   for(i in longueur){
     growth <- cbind(growth,(data[1,i]-data[1,i-1])/data[1,i-1])
   }
+  return(growth)
 }
+growth<-growth_month_month()
+growth
 somme_mois <- month_month_growth(data)
 somme_mois
-?seq
 
+#year on year -> comparaison avec l'année précédente .
 
