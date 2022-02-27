@@ -136,10 +136,6 @@ importe_et_nettoie <- function(month){
   return(data_uncertainty)
 }
 
-?`Memory-limits`
-for(v in table(data_uncertainty$PERIOD) ){
-  print(names(v))
-}
 
 
 importe_et_nettoie_test <- function(data){
@@ -171,19 +167,47 @@ somme_month_month <- function(data){
   }
   return(somme)
 }
-growth_month_month <- function(){
-  data <- somme_month_month(data)
-  longueur <- seq(3, length(data),1)
-  growth <- (data[1,2]-data[1,1])/data[1,1]
+somme_month_month(data)
+growth_month_month <- function(data){
+  data_bis <- somme_month_month(data)
+  longueur <- seq(3, length(data_bis),1)
+  growth <- (data_bis[1,2]-data_bis[1,1])/data_bis[1,1]
   for(i in longueur){
-    growth <- cbind(growth,(data[1,i]-data[1,i-1])/data[1,i-1])
+    growth <- cbind(growth,(data_bis[1,i]-data_bis[1,i-1])/data_bis[1,i-1])
   }
+  colnames(growth)<-levels(as.factor(data$PERIOD))[2:4]
   return(growth)
 }
-growth<-growth_month_month()
-growth
-somme_mois <- month_month_growth(data)
-somme_mois
 
+growth_month_year <- function(data){
+  somme_par_mois <- somme_month_month(data)
+  growth <- (somme_par_mois[1,13]-somme_par_mois[1,1])/somme_par_mois[1,13]
+  longueur <- seq(2, length(somme_par_mois),1)
+  if(exists(growth)){ 
+    for(i in longueur-12){
+      growth <- cbind(growth,(somme_par_mois[1,i+12]-somme_par_mois[1,i])/somme_par_mois[1,i+12])
+      colnames(growth)[i] <- paste(as.integer(levels(as.factor(data$PERIOD)))[i],as.integer(levels(as.factor(data$PERIOD)))[i+12],sep = "/")
+    }
+  return(growth)
+  }else{
+  return("La base de données est plus courte qu'une année, nous ne poubons donc pas étudier les variations
+         de commerce d'une année sur l'autre")
+  }
+}
+
+
+
+growth_month_year(data)
+length(data)
+
+
+growth_mm_nomme(data)
+growth_month_month(data)
+growth_bis<-growth_month_month(data=data)
+colnames(growth_bis)<-as.integer(levels(as.factor(data$PERIOD)))[2:4]
+colnames(growth_bis)[1]
+growth
+somme_month_month(data)
+#?`Memory-limits`
 #year on year -> comparaison avec l'année précédente .
 
