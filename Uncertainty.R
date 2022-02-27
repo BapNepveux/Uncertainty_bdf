@@ -29,11 +29,6 @@ string_2017_onward <- function(){
   return(alpha[indice_depart:length(alpha)])
 }
 
-string_dernier_mois <- function(){
-  string_1 <- string_2017_onward()
-  return(string_1[length(string_1)])
-}
-
 importe_data <- function(month){
   # month can be either "all" or "last"
   if(month=="all"){
@@ -139,18 +134,10 @@ importe_et_nettoie <- function(month){
   return(data_uncertainty)
 }
 
-importe_et_nettoie_test <- function(data){
-  data <- gere_iso(data)
-  data <- gere_nc(data)
-  data <- gere_flows(data)
-  data <- conversion_nc(data)
-  return(data)
-}
-
 somme_month_month <- function(data){
-  fabrice <- as.integer(levels(as.factor(data$PERIOD)))
-  somme <- sum(data$VALUE_IN_EUROS[data$PERIOD==fabrice[1]&data$TRADE_TYPE!="I"])
-  for(mois in fabrice[2:length(fabrice)]){
+  periods <- as.integer(levels(as.factor(data$PERIOD)))
+  somme <- sum(data$VALUE_IN_EUROS[data$PERIOD==periods[1]&data$TRADE_TYPE!="I"])
+  for(mois in periods[2:length(periods)]){
   somme <- cbind(somme,sum(data$VALUE_IN_EUROS[data$PERIOD==mois&data$TRADE_TYPE!="I"]))
   }
   return(somme)
