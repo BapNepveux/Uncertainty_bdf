@@ -155,19 +155,19 @@ importe_et_nettoie_test <- function(data){
   data <- conversion_nc(data)
   return(data)
 }
-creation_base_test<- function(){
-  data <- import_un_mois("full201811.7z")
-  solo <- import_un_mois("full201812.7z")
-  data <- rbind(data,solo)
-  solo <- import_un_mois("full201901.7z")
-  data <- rbind(data,solo)
-  solo <- import_un_mois("full201902.7z")
-  data <- rbind(data,solo)
-  importe_et_nettoie_test(data)
-  return(data)
-}
-data <- creation_base_test()
-as.integer(levels(as.factor(data$PERIOD)))
+# creation_base_test<- function(){
+#   data <- import_un_mois("full201811.7z")
+#   solo <- import_un_mois("full201812.7z")
+#   data <- rbind(data,solo)
+#   solo <- import_un_mois("full201901.7z")
+#   data <- rbind(data,solo)
+#   solo <- import_un_mois("full201902.7z")
+#   data <- rbind(data,solo)
+#   importe_et_nettoie_test(data)
+#   return(data)
+# }
+# data <- creation_base_test()
+# as.integer(levels(as.factor(data$PERIOD)))
 
 somme_month_month <- function(data){
   fabrice <- as.integer(levels(as.factor(data$PERIOD)))
@@ -178,7 +178,7 @@ somme_month_month <- function(data){
   return(somme)
 }
 
-somme_month_month(data)
+
 
 growth_month_month <- function(data){
   data_bis <- somme_month_month(data)
@@ -227,34 +227,22 @@ growth_month_year_midpoint <- function(data){
   }
 }
 
+growth_month_year_log <- function(data){
+  somme_par_mois <- somme_month_month(data)
+  longueur <- seq(2, length(somme_par_mois), 1)
+  essai <- try(log(somme_par_mois[1,13])-log(somme_par_mois[1,1]),silent = T)
+  if(class(essai)=="numeric"){ 
+    growth <- (log(somme_par_mois[1,13])-log(somme_par_mois[1,1]))
+    for(i in longueur[1:length(longueur)-12]){
+      growth <- cbind(growth,(log(somme_par_mois[1,i+12])-log(somme_par_mois[1,i])))
+      colnames(growth)[i] <- paste(as.integer(levels(as.factor(data$PERIOD)))[i],as.integer(levels(as.factor(data$PERIOD)))[i+12],sep = "/")
+    }
+    return(growth)
+  }
+  else{
+    return("La base de données est plus courte qu'une année, nous ne pouvons donc pas étudier les variations
+         des échanges d'une année sur l'autre")
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-growth_month_year(data)
-somme_par_mois <- somme_month_month(data)
-bonjour <- try((somme_par_mois[1,2]-somme_par_mois[1,1])/somme_par_mois[1,2],silent = T)
-class(bonjour)
-growth_month_year(data)
-length(data)
-
-
-growth_mm_nomme(data)
-growth_month_month(data)
-growth_bis<-growth_month_month(data=data)
-colnames(growth_bis)<-as.integer(levels(as.factor(data$PERIOD)))[2:4]
-colnames(growth_bis)[1]
-growth
-somme_month_month(data)
-#?`Memory-limits`
-#year on year -> comparaison avec l'année précédente.
 
