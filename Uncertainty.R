@@ -2,7 +2,6 @@ library(archive)
 library(rvest)
 library(tidyverse)
 
-
 import_un_mois <- function(nom_du_fichier){
   tf <- tempfile() ; td <- tempdir()
   website <- "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?sort=1&downfile=comext%2FCOMEXT_DATA%2FPRODUCTS%2F"
@@ -12,7 +11,6 @@ import_un_mois <- function(nom_du_fichier){
   data <- read.table(pre_data, sep = ",", header = T)
   return(data)
 }
-
 
 string_tous_mois <- function(){
   code_html_page<-read_html(url("https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?sort=1&dir=comext%2FCOMEXT_DATA%2FPRODUCTS"))
@@ -36,8 +34,6 @@ string_dernier_mois <- function(){
   return(string_1[length(string_1)])
 }
 
-
-
 importe_data <- function(month){
   # month can be either "all" or "last"
   if(month=="all"){
@@ -58,7 +54,6 @@ importe_data <- function(month){
   }
     
 }
-
 
 gere_iso <- function(data){
   data <- data[data$DECLARANT_ISO !="QQ"&data$DECLARANT_ISO !="QU"&
@@ -134,8 +129,6 @@ conversion_nc <- function(data){
   return(data)
 }
 
-
-
 importe_et_nettoie <- function(month){
   data <- importe_data(month = month)
   data <- gere_iso(data)
@@ -146,8 +139,6 @@ importe_et_nettoie <- function(month){
   return(data_uncertainty)
 }
 
-
-
 importe_et_nettoie_test <- function(data){
   data <- gere_iso(data)
   data <- gere_nc(data)
@@ -155,19 +146,6 @@ importe_et_nettoie_test <- function(data){
   data <- conversion_nc(data)
   return(data)
 }
-# creation_base_test<- function(){
-#   data <- import_un_mois("full201811.7z")
-#   solo <- import_un_mois("full201812.7z")
-#   data <- rbind(data,solo)
-#   solo <- import_un_mois("full201901.7z")
-#   data <- rbind(data,solo)
-#   solo <- import_un_mois("full201902.7z")
-#   data <- rbind(data,solo)
-#   importe_et_nettoie_test(data)
-#   return(data)
-# }
-# data <- creation_base_test()
-# as.integer(levels(as.factor(data$PERIOD)))
 
 somme_month_month <- function(data){
   fabrice <- as.integer(levels(as.factor(data$PERIOD)))
@@ -177,8 +155,6 @@ somme_month_month <- function(data){
   }
   return(somme)
 }
-
-
 
 growth_month_month <- function(data){
   data_bis <- somme_month_month(data)
@@ -245,4 +221,21 @@ growth_month_year_log <- function(data){
   }
 }
 
-
+compute_growth_rate <- function(data,growth="normal"){
+  # growth can be either "month","normal","midpoint" or "delta_log"
+  if(growth=="month"){
+    return(growth_month_month(data))
+  } 
+  else if(growth=="normal"){
+    return(growth_month_year_normal(data))
+  }
+  else if(growth=="midpoint"){
+    return(growth_month_year_midpoint(data))
+  }
+  else if(growth=="delta_log"){
+    return(growth_month_year_log(data))
+  } 
+  else {
+    print("Error: growth can be either 'month','normal','midpoint' or 'delta_log'")
+  }
+}
