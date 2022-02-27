@@ -136,55 +136,51 @@ importe_et_nettoie <- function(month){
   return(data_uncertainty)
 }
 
-#data$PRODUCT_NC <- substring(data$PRODUCT_NC,1,6)
-#data <- data[!(data$TRADE_TYPE=="I"&data$QUANTITY_IN_KG==0),]
-
-which(data$FLOW[data$TRADE_TYPE=="I"])
-table(data$QUANTITY_IN_KG[data$TRADE_TYPE=="I"])
-#Pas compris s'il f allait remplacer:
-#replace iso2="GR" if iso2=="EL"
-#replace drop=1 if inlist(iso2,"GL","PA","XX")
-#Checker le 0 dans les consignes de cleaning
-#egen drop=sum(export) if nc8group==1| nc8part==1
-
-#answer <- c( content, wrapper) permet de append
-#Roxygen package pour la doc des fonctions
-#https://stackoverflow.com/questions/7187442/filter-a-vector-of-strings-based-on-string-matching
-importe_data(month = "last")
-table(data_uncertainty$PERIOD)
-# TESTS :
-tf <- tempfile() ; td <- tempdir()
-file.path <- "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?sort=1&downfile=comext%2FCOMEXT_DATA%2FPRODUCTS%2Ffull200301.7z"
-download.file( file.path , tf , mode = "wb" )
-data <- archive_extract(tf)
-data2 <- read.table(data, sep = ",", header = T)
-
-data2 <- import_un_mois("fullxixu202108.7z")
-
-alpha <- recupere_noms_mois()
-depart <- grepl("2017",alpha)
-indice <- which(depart)
-indice_depart <- indice[1]
-alpha[indice_depart:length(alpha)]
-string_2017_onward()
-final<- import_un_mois(string_2017_onward()[1])
- for (x in string_2017_onward()[2:3]){
-  solo <- import_un_mois(x)
-  final <- rbind(final,solo)
+?`Memory-limits`
+for(v in table(data_uncertainty$PERIOD) ){
+  print(names(v))
 }
 
-importe_data("all")
-df1 <- import_un_mois("full201703.7z")
-df2 <- import_un_mois("full201702.7z")
-df_test <- rbind(df1,df2)
-table(df_test$PERIOD)
 
-which( colnames(data)=="PRODUCT_NC" )
-which(data[,"PRODUCT_NC"])
-data<-data_uncertainty
-table()
+importe_et_nettoie_test <- function(data){
+  data <- gere_iso(data)
+  data <- gere_nc(data)
+  data <- gere_flows(data)
+  data <- conversion_nc(data)
+  return(data)
+}
+creation_base_test<- function(){
+  data <- import_un_mois("full201811.7z")
+  solo <- import_un_mois("full201812.7z")
+  data <- rbind(data,solo)
+  solo <- import_un_mois("full201901.7z")
+  data <- rbind(data,solo)
+  solo <- import_un_mois("full201902.7z")
+  data <- rbind(data,solo)
+  importe_et_nettoie_test(data)
+  return(data)
+}
+data <- creation_base_test()
+as.integer(levels(as.factor(data$PERIOD)))
 
-table(data$PARTNER_ISO)
-table(data$PRODUCT_NC)
-type
-df2<-df1[!(df1$Name=="George" | df1$Name=="Andrea"),]
+somme_month_month <- function(data){
+  fabrice <- as.integer(levels(as.factor(data$PERIOD)))
+  somme <- sum(data$VALUE_IN_EUROS[data$PERIOD==fabrice[1]&data$TRADE_TYPE!="I"])
+  for(mois in fabrice[2:length(fabrice)]){
+  somme <- cbind(somme,sum(data$VALUE_IN_EUROS[data$PERIOD==mois&data$TRADE_TYPE!="I"]))
+  }
+  return(somme)
+}
+growth_month_month <- function(){
+  data <- somme_month_month()
+  longueur <- seq(3, length(data),1)
+  growth <- (data[1,2]-data[1,1])/data[1,1]
+  for(i in longueur){
+    growth <- cbind(growth,(data[1,i]-data[1,i-1])/data[1,i-1])
+  }
+}
+somme_mois <- month_month_growth(data)
+somme_mois
+?seq
+
+
